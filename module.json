@@ -1,0 +1,35 @@
+{
+  "name": "foundryvtt-coc7th-helper",
+  "title": "CoC 7th Edition Helper",
+  "description": "A module for Call of Cthulhu 7th edition with visual effects for weapon rolls",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "10",
+    "verified": "12"
+  },
+  "author": "HKTRPG-SAD",
+  "esmodules": [
+    "index.js"
+  ],
+  "styles": [],
+  "packs": [],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "langs/en.json"
+    },
+    {
+      "lang": "zh-tw",
+      "name": "繁體中文",
+      "path": "langs/zh-tw.json"
+    }
+  ],
+  "url": "https://github.com/hktrpg/FoundryVTT-COC7th-helper",
+  "manifest": "https://github.com/hktrpg/FoundryVTT-COC7th-helper/releases/latest/download/module.json",
+  "download": "https://github.com/hktrpg/FoundryVTT-COC7th-helper/releases/latest/download/module.zip",
+  "license": "LICENSE",
+  "readme": "README.md",
+  "bugs": "https://github.com/hktrpg/FoundryVTT-COC7th-helper/issues",
+  "changelog": "https://github.com/hktrpg/FoundryVTT-COC7th-helper/releases"
+}
