@@ -11,11 +11,9 @@ export const DEFAULT_EFFECT_FILES = {
         hard: "modules/JB2A_DnD5e/Library/Generic/Unarmed_Attacks/Flurry_Of_Blows/FlurryOfBlows_01_Regular_Blue_Magical02_800x600.webm",
         extreme: "modules/JB2A_DnD5e/Library/Generic/Unarmed_Attacks/Unarmed_Strike/UnarmedStrike_01_Regular_Blue_Physical02_800x600.webm"
     },
-
-    //http://localhost:30000/modules/JB2A_DnD5e/Library/Generic/Unarmed_Attacks/Unarmed_Strike/UnarmedStrike_01_Dark_Red_Magical02_800x600.webm
     range: {
         fumble: "modules/JB2A_DnD5e/Library/Generic/Impact/Impact_10_Regular_Orange_400x400.webm",
-        failure: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Arrow01_01_Regular_White_15ft_1000x400.webm",
+        failure: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_03_Regular_Blue_90ft_4000x400.webm",
         regular: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_01_Regular_Orange_30ft_1600x400.webm",
         hard: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_02_Regular_Orange_60ft_2800x400.webm",
         extreme: "modules/JB2A_DnD5e/Library/Generic/Impact/GroundCrackImpact_01_Regular_Orange_600x600.webm"
@@ -65,8 +63,8 @@ export function registerSettings() {
 
     // Melee effect files
     game.settings.register(MODULE_NAME, "meleeFumbleEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeFumbleEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -75,8 +73,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "meleeFailureEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeFailureEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -85,8 +83,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "meleeRegularEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeRegularEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -95,8 +93,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "meleeHardEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeHardEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -105,8 +103,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "meleeExtremeEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingMeleeExtremeEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -116,8 +114,8 @@ export function registerSettings() {
 
     // Range effect files
     game.settings.register(MODULE_NAME, "rangeFumbleEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeFumbleEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -126,8 +124,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "rangeFailureEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeFailureEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -136,8 +134,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "rangeRegularEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeRegularEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -146,8 +144,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "rangeHardEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeHardEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -156,8 +154,8 @@ export function registerSettings() {
     });
 
     game.settings.register(MODULE_NAME, "rangeExtremeEffect", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFiles"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeEffectFilesHint"),
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingRangeExtremeEffect"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingEffectFilesHint"),
         scope: "world",
         config: true,
         type: String,
@@ -225,6 +223,16 @@ export function registerSettings() {
         type: Boolean,
         default: false
     });
+
+    // Token debug mode - more detailed token finding logs
+    game.settings.register(MODULE_NAME, "tokenDebugMode", {
+        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingTokenDebugMode"),
+        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingTokenDebugModeHint"),
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: false
+    });
 }
 
 // Get the current effect files based on settings
@@ -276,4 +284,9 @@ export function areRangeEffectsEnabled() {
 // Check if debug mode is enabled
 export function isDebugModeEnabled() {
     return game.settings.get(MODULE_NAME, "debugMode");
+}
+
+// Check if token debug mode is enabled
+export function isTokenDebugModeEnabled() {
+    return game.settings.get(MODULE_NAME, "tokenDebugMode");
 }

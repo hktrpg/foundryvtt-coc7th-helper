@@ -7,7 +7,8 @@ import {
     areEffectsEnabled,
     areMeleeEffectsEnabled,
     areRangeEffectsEnabled,
-    isDebugModeEnabled
+    isDebugModeEnabled,
+    isTokenDebugModeEnabled
 } from './settings.js';
 
 // Define effect file mapping based on attack type and success level
@@ -22,7 +23,7 @@ let effectFiles = {
     },
     range: {
         fumble: "modules/JB2A_DnD5e/Library/Generic/Impact/Impact_10_Regular_Orange_400x400.webm", // Range Fumble: Orange failure effect
-        failure: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Arrow01_01_Regular_White_15ft_1000x400.webm", // Range Failure: Basic arrow
+        failure: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_03_Regular_Blue_90ft_4000x400", // Range Failure: Basic arrow
         regular: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_01_Regular_Orange_30ft_1600x400.webm", // Range Regular Success: Basic bullet
         hard: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_02_Regular_Orange_60ft_2800x400.webm", // Range Hard Success: Powerful bullet
         extreme: "modules/JB2A_DnD5e/Library/Generic/Impact/GroundCrackImpact_01_Regular_Orange_600x600.webm" // Range Extreme Success: Ground explosion effect
@@ -95,7 +96,7 @@ Hooks.on("updateChatMessage", async (message) => {
 
     // Parse chat message HTML content
     const content = $(message.content);
-    const rollResult = content.find(".coc7.roll-result");
+    const rollResult = content.find(".dice-roll");
     const chatCard = content.find(".coc7.chat-card");
 
     if (!rollResult.length) {
@@ -105,8 +106,8 @@ Hooks.on("updateChatMessage", async (message) => {
 
     // Extract roll result attributes
     const successLevel = parseInt(rollResult.data("success-level") || 0);
-    const isSuccess = rollResult.data("is-success") === "true";
-    const isFumble = rollResult.data("is-fumble") === "true";
+    const isSuccess = successLevel > 0;
+    const isFumble = rollResult.data("fumble") === "true";
     const targetKey = chatCard.data("target-key"); // Target token ID
     const fullActorKey = rollResult.data("actor-key"); // Attacker actor ID
     const directActorId = rollResult.data("actor-id"); // Direct actor ID
@@ -131,20 +132,94 @@ Hooks.on("updateChatMessage", async (message) => {
     if (fullActorKey && fullActorKey.includes(".")) {
         const sceneScopedTokenId = fullActorKey.split(".").pop();
         attacker = canvas.tokens.placeables.find(t => t.id === sceneScopedTokenId);
+        
+        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
+            console.log(`${MODULE_NAME} | Found attacker using scene-scoped token ID: ${sceneScopedTokenId}`);
+        }
     }
 
     // Method 2: Try using the direct actor ID
     if (!attacker && directActorId) {
         attacker = canvas.tokens.placeables.find(t => t.actor.id === directActorId);
+        
+        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
+            console.log(`${MODULE_NAME} | Found attacker using direct actor ID: ${directActorId}`);
+        }
     }
 
     // Method 3: Try using the full actor key as is
     if (!attacker && fullActorKey) {
         attacker = canvas.tokens.placeables.find(t => t.actor.id === fullActorKey);
+        
+        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
+            console.log(`${MODULE_NAME} | Found attacker using full actor key: ${fullActorKey}`);
+        }
+    }
+    
+    // Method 4: Try using the actor ID from the speaker
+    if (!attacker && message.speaker && message.speaker.actor) {
+        attacker = canvas.tokens.placeables.find(t => t.actor.id === message.speaker.actor);
+        
+        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
+            console.log(`${MODULE_NAME} | Found attacker using speaker actor ID: ${message.speaker.actor}`);
+        }
+    }
+    
+    // Method 5: Try using the token ID from the speaker
+    if (!attacker && message.speaker && message.speaker.token) {
+        attacker = canvas.tokens.placeables.find(t => t.id === message.speaker.token);
+        
+        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
+            console.log(`${MODULE_NAME} | Found attacker using speaker token ID: ${message.speaker.token}`);
+        }
     }
 
     if (!attacker) {
         console.warn(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogAttackerNotFound", {actorKey: fullActorKey, actorId: directActorId})}`);
+        
+        // Try to find the actor in the game actors collection
+        let actor = null;
+        if (directActorId) {
+            actor = game.actors.get(directActorId);
+        } else if (fullActorKey) {
+            actor = game.actors.get(fullActorKey);
+        }
+        
+        if (actor) {
+            console.warn(`${MODULE_NAME} | Actor found in game.actors but no token on canvas. Actor name: ${actor.name}`);
+            
+            // If token debug mode is enabled, log all tokens on the canvas
+            if (isTokenDebugModeEnabled()) {
+                console.log(`${MODULE_NAME} | All tokens on canvas:`, canvas.tokens.placeables.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    actorId: t.actor.id
+                })));
+            }
+            
+            // If we have a target, we can still show an effect at the target location
+            if (target) {
+                try {
+                    // Create Sequencer sequence
+                    const sequence = new Sequence()
+                        .effect()
+                        .file(effectFile)
+                        .scale(scale)
+                        .atLocation(target)
+                        .center()
+                        .missed(!isSuccess);
+                    
+                    sequence.play();
+                    
+                    if (isDebugModeEnabled()) {
+                        console.log(`${MODULE_NAME} | Showing effect at target location since attacker token not found`);
+                    }
+                } catch (error) {
+                    console.error(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogSequencerError", {error: error.message})}`);
+                }
+            }
+        }
+        
         return;
     }
 
@@ -250,13 +325,6 @@ Hooks.on("updateChatMessage", async (message) => {
                 ? `${game.i18n.localize("Fvtt_CoC7th_Helper.EffectRegular")} (${game.i18n.localize("Fvtt_CoC7th_Helper.EffectLevel")} ${successLevel})` 
                 : game.i18n.localize("Fvtt_CoC7th_Helper.EffectFailure");
         
-        console.log(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogWeaponRoll", {
-            attackType: attackTypeLocalized,
-            attackerName: attacker.name,
-            targetName: target ? target.name : game.i18n.localize("Fvtt_CoC7th_Helper.NoTarget"),
-            weaponId: itemId,
-            result: resultText,
-            effectFile: effectFile
-        })}`);
+        console.log(`${MODULE_NAME} | CoC7 ${attackType} 武器擲骰：${attacker.name} 對抗 ${target ? target.name : game.i18n.localize("Fvtt_CoC7th_Helper.NoTarget")}，武器ID：${itemId}，結果：${resultText}，效果：${effectFile}`);
     }
 });
