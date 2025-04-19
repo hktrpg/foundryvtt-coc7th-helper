@@ -95,7 +95,7 @@ Hooks.on("updateChatMessage", async (message) => {
 
     // Parse chat message HTML content
     const content = $(message.content);
-    const rollResult = content.find(".dice-roll.gm-visible-only");
+    const rollResult = content.find(".coc7.roll-result");
     const chatCard = content.find(".coc7.chat-card");
 
     if (!rollResult.length) {
@@ -105,12 +105,24 @@ Hooks.on("updateChatMessage", async (message) => {
 
     // Extract roll result attributes
     const successLevel = parseInt(rollResult.data("success-level") || 0);
-    const isSuccess = successLevel > 0;
-    const isFumble = rollResult.data("fumble") === "true";
+    const isSuccess = rollResult.data("is-success") === "true";
+    const isFumble = rollResult.data("is-fumble") === "true";
     const targetKey = chatCard.data("target-key"); // Target token ID
     const fullActorKey = rollResult.data("actor-key"); // Attacker actor ID
     const directActorId = rollResult.data("actor-id"); // Direct actor ID
     const itemId = chatCard.data("item-id"); // Weapon ID
+
+    if (isDebugModeEnabled()) {
+        console.log(`${MODULE_NAME} | Debug - Roll Result:`, {
+            successLevel,
+            isSuccess,
+            isFumble,
+            targetKey,
+            fullActorKey,
+            directActorId,
+            itemId
+        });
+    }
 
     // Try to find the token using different methods
     let attacker = null;
@@ -181,7 +193,16 @@ Hooks.on("updateChatMessage", async (message) => {
         }
     }
 
-    // Select effect file, all melee weapons use unified effect
+    if (isDebugModeEnabled()) {
+        console.log(`${MODULE_NAME} | Debug - Selected effect:`, {
+            effectKey,
+            successLevel,
+            isSuccess,
+            isFumble
+        });
+    }
+
+    // Select effect file based on attack type and success level
     const effectFile = effectFiles[attackType][effectKey];
     const scale = scaleFactors[effectKey];
 
