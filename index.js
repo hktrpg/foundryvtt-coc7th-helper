@@ -11,34 +11,9 @@ import {
     isTokenDebugModeEnabled
 } from './settings.js';
 
-// Define effect file mapping based on attack type and success level
-// These will be overridden by settings when the module is loaded
-let effectFiles = {
-    melee: {
-        fumble: "modules/JB2A_DnD5e/Library/Generic/Impact/Impact_12_Regular_Blue_400x400.webm", // Melee Fumble: Blue failure effect
-        failure: "modules/JB2A_DnD5e/Library/Generic/Impact/Impact_01_Regular_Blue_400x400.webm", // Melee Failure: Light blue impact
-        regular: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Melee/Sword01_02_Regular_White_800x600.webm", // Melee Regular Success: Basic sword strike
-        hard: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Melee/Sword01_04_Regular_White_800x600.webm", // Melee Hard Success: Powerful sword strike
-        extreme: "modules/JB2A_DnD5e/Library/Generic/Impact/GroundCrackImpact_03_Regular_Orange_600x600.webm" // Melee Extreme Success: Ground crack effect
-    },
-    range: {
-        fumble: "modules/JB2A_DnD5e/Library/Generic/Impact/Impact_10_Regular_Orange_400x400.webm", // Range Fumble: Orange failure effect
-        failure: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_03_Regular_Blue_90ft_4000x400", // Range Failure: Basic arrow
-        regular: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_01_Regular_Orange_30ft_1600x400.webm", // Range Regular Success: Basic bullet
-        hard: "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Bullet_02_Regular_Orange_60ft_2800x400.webm", // Range Hard Success: Powerful bullet
-        extreme: "modules/JB2A_DnD5e/Library/Generic/Impact/GroundCrackImpact_01_Regular_Orange_600x600.webm" // Range Extreme Success: Ground explosion effect
-    }
-};
-
-// Define scale factor mapping
-// These will be overridden by settings when the module is loaded
-let scaleFactors = {
-    fumble: 1.0, // Exaggerated effect
-    failure: 0.7,
-    regular: 0.7,
-    hard: 0.9,
-    extreme: 1.2
-};
+// Initialize variables for effect files and scale factors
+let effectFiles = {};
+let scaleFactors = {};
 
 // Initialize module
 Hooks.once('init', () => {
@@ -203,8 +178,8 @@ Hooks.on("updateChatMessage", async (message) => {
                     // Create Sequencer sequence
                     const sequence = new Sequence()
                         .effect()
-                        .file(effectFile)
-                        .scale(scale)
+                        .file(effectFiles[attackType]["fumble"])
+                        .scale(scaleFactors["fumble"])
                         .atLocation(target)
                         .center()
                         .missed(!isSuccess);
