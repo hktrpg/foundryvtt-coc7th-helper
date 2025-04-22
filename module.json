@@ -2,7 +2,7 @@
   "name": "foundryvtt-coc7th-helper",
   "title": "CoC 7th Edition Helper",
   "description": "A module for Call of Cthulhu 7th edition with visual effects for weapon rolls",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "compatibility": {
     "minimum": "10",
     "verified": "12"

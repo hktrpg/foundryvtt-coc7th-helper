@@ -7,8 +7,7 @@ import {
     areEffectsEnabled,
     areMeleeEffectsEnabled,
     areRangeEffectsEnabled,
-    isDebugModeEnabled,
-    isTokenDebugModeEnabled
+    isDebugModeEnabled
 } from './settings.js';
 
 // Initialize variables for effect files and scale factors
@@ -28,10 +27,31 @@ Hooks.once('ready', () => {
     console.log(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogSettingsLoaded")}`);
 });
 
+function getToken(tokenKey) {
+    if (tokenKey) {
+        const [sceneId, tokenId] = tokenKey.split('.')
+        if (!sceneId || !tokenId) return null
+
+        const scene = game.scenes.get(sceneId)
+        if (!scene) return null
+
+        const token = scene.getEmbeddedDocument('Token', tokenId)
+        if (!token) return null
+
+        return token
+    }
+    return null
+}
+
 Hooks.on("updateChatMessage", async (message) => {
-    // Debug logging if enabled
+    // Initial debug logging
     if (isDebugModeEnabled()) {
-        console.log("updateChatMessage", message);
+        console.log(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogInitializing")}`);
+        console.log(`${MODULE_NAME} | Debug - Processing new chat message:`, {
+            messageId: message._id,
+            speaker: message.speaker,
+            content: message.content.substring(0, 100) + "..."
+        });
     }
 
     // Check if effects are enabled
@@ -42,14 +62,18 @@ Hooks.on("updateChatMessage", async (message) => {
         return;
     }
 
-    // Ensure message is from CoC7 system's weapon roll (melee or range)
-    if (!message.content.includes("coc7 chat-card")) return;
+    // Check if message is from CoC7 system
+    if (!message.content.includes("coc7 chat-card")) {
+        if (isDebugModeEnabled()) {
+            console.log(`${MODULE_NAME} | Debug - Not a CoC7 chat card, skipping`);
+        }
+        return;
+    }
 
     // Determine attack type
     let attackType = null;
     if (message.content.includes("melee initiator")) {
         attackType = "melee";
-        // Check if melee effects are enabled
         if (!areMeleeEffectsEnabled()) {
             if (isDebugModeEnabled()) {
                 console.log(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogMeleeEffectsDisabled")}`);
@@ -58,7 +82,6 @@ Hooks.on("updateChatMessage", async (message) => {
         }
     } else if (message.content.includes("range initiator")) {
         attackType = "range";
-        // Check if range effects are enabled
         if (!areRangeEffectsEnabled()) {
             if (isDebugModeEnabled()) {
                 console.log(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogRangeEffectsDisabled")}`);
@@ -66,7 +89,14 @@ Hooks.on("updateChatMessage", async (message) => {
             return;
         }
     } else {
-        return; // Not a melee or range roll, exit
+        if (isDebugModeEnabled()) {
+            console.log(`${MODULE_NAME} | Debug - Not a melee or range attack, skipping`);
+        }
+        return;
+    }
+
+    if (isDebugModeEnabled()) {
+        console.log(`${MODULE_NAME} | Debug - Processing ${game.i18n.localize(`Fvtt_CoC7th_Helper.AttackType${attackType.charAt(0).toUpperCase() + attackType.slice(1)}`)} attack`);
     }
 
     // Parse chat message HTML content
@@ -83,119 +113,39 @@ Hooks.on("updateChatMessage", async (message) => {
     const successLevel = parseInt(rollResult.data("success-level") || 0);
     const isSuccess = successLevel > 0;
     const isFumble = rollResult.data("fumble") === "true";
-    const targetKey = chatCard.data("target-key"); // Target token ID
-    const fullActorKey = rollResult.data("actor-key"); // Attacker actor ID
-    const directActorId = rollResult.data("actor-id"); // Direct actor ID
-    const itemId = chatCard.data("item-id"); // Weapon ID
+    const targetKey = rollResult.data("target-key") || chatCard.data("target-key");
+    const fullActorKey = rollResult.data("actor-key") || chatCard.data("actor-key");
+    const itemId = chatCard.data("item-id");
 
     if (isDebugModeEnabled()) {
-        console.log(`${MODULE_NAME} | Debug - Roll Result:`, {
+        console.log(`${MODULE_NAME} | Debug - Extracted data:`, {
             successLevel,
             isSuccess,
             isFumble,
             targetKey,
             fullActorKey,
-            directActorId,
             itemId
         });
     }
 
-    // Try to find the token using different methods
-    let attacker = null;
-
-    // Method 1: Try using the scene-scoped actor key
-    if (fullActorKey && fullActorKey.includes(".")) {
-        const sceneScopedTokenId = fullActorKey.split(".").pop();
-        attacker = canvas.tokens.placeables.find(t => t.id === sceneScopedTokenId);
-        
-        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
-            console.log(`${MODULE_NAME} | Found attacker using scene-scoped token ID: ${sceneScopedTokenId}`);
-        }
-    }
-
-    // Method 2: Try using the direct actor ID
-    if (!attacker && directActorId) {
-        attacker = canvas.tokens.placeables.find(t => t.actor.id === directActorId);
-        
-        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
-            console.log(`${MODULE_NAME} | Found attacker using direct actor ID: ${directActorId}`);
-        }
-    }
-
-    // Method 3: Try using the full actor key as is
-    if (!attacker && fullActorKey) {
-        attacker = canvas.tokens.placeables.find(t => t.actor.id === fullActorKey);
-        
-        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
-            console.log(`${MODULE_NAME} | Found attacker using full actor key: ${fullActorKey}`);
-        }
-    }
-    
-    // Method 4: Try using the actor ID from the speaker
-    if (!attacker && message.speaker && message.speaker.actor) {
-        attacker = canvas.tokens.placeables.find(t => t.actor.id === message.speaker.actor);
-        
-        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
-            console.log(`${MODULE_NAME} | Found attacker using speaker actor ID: ${message.speaker.actor}`);
-        }
-    }
-    
-    // Method 5: Try using the token ID from the speaker
-    if (!attacker && message.speaker && message.speaker.token) {
-        attacker = canvas.tokens.placeables.find(t => t.id === message.speaker.token);
-        
-        if ((isDebugModeEnabled() || isTokenDebugModeEnabled()) && attacker) {
-            console.log(`${MODULE_NAME} | Found attacker using speaker token ID: ${message.speaker.token}`);
-        }
-    }
-
+    // Find attacker token
+    let attacker = getToken(fullActorKey);
     if (!attacker) {
-        console.warn(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogAttackerNotFound", {actorKey: fullActorKey, actorId: directActorId})}`);
-        
-        // Try to find the actor in the game actors collection
-        let actor = null;
-        if (directActorId) {
-            actor = game.actors.get(directActorId);
-        } else if (fullActorKey) {
-            actor = game.actors.get(fullActorKey);
-        }
-        
-        if (actor) {
-            console.warn(`${MODULE_NAME} | Actor found in game.actors but no token on canvas. Actor name: ${actor.name}`);
-            
-            // If token debug mode is enabled, log all tokens on the canvas
-            if (isTokenDebugModeEnabled()) {
-                console.log(`${MODULE_NAME} | All tokens on canvas:`, canvas.tokens.placeables.map(t => ({
-                    id: t.id,
-                    name: t.name,
-                    actorId: t.actor.id
-                })));
+        // Try to get token from speaker data if available
+        if (message.speaker?.scene && message.speaker?.token) {
+            if (isDebugModeEnabled()) {
+                console.log(`${MODULE_NAME} | Debug - Trying to find attacker from speaker data:`, {
+                    scene: message.speaker.scene,
+                    token: message.speaker.token
+                });
             }
-            
-            // If we have a target, we can still show an effect at the target location
-            if (target) {
-                try {
-                    // Create Sequencer sequence
-                    const sequence = new Sequence()
-                        .effect()
-                        .file(effectFiles[attackType]["fumble"])
-                        .scale(scaleFactors["fumble"])
-                        .atLocation(target)
-                        .center()
-                        .missed(!isSuccess);
-                    
-                    sequence.play();
-                    
-                    if (isDebugModeEnabled()) {
-                        console.log(`${MODULE_NAME} | Showing effect at target location since attacker token not found`);
-                    }
-                } catch (error) {
-                    console.error(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogSequencerError", {error: error.message})}`);
-                }
-            }
+            attacker = getToken(`${message.speaker.scene}.${message.speaker.token}`);
         }
-        
-        return;
+
+        if (!attacker) {
+            console.warn(`${MODULE_NAME} | ${game.i18n.format("Fvtt_CoC7th_Helper.LogAttackerNotFound", { actorKey: fullActorKey, actorId: message.speaker?.actor })}`);
+            return;
+        }
     }
 
     if (isDebugModeEnabled()) {
@@ -206,19 +156,34 @@ Hooks.on("updateChatMessage", async (message) => {
         });
     }
 
-    // Find target token, handle empty targetKey case
+    // Find target token
     let target = null;
-    if (targetKey) {
-        target = canvas.tokens.get(targetKey) || canvas.tokens.placeables.find(t => t.actor.id === targetKey);
+    if (targetKey && targetKey !== "0") {
+        if (isDebugModeEnabled()) {
+            console.log(`${MODULE_NAME} | Debug - Looking for target with key: ${targetKey}`);
+        }
+        target = getToken(targetKey);
     } else {
-        // If targetKey is empty, check selected token
+        // If targetKey is empty or "0", check selected token
         const controlledTokens = canvas.tokens.controlled;
         if (controlledTokens.length === 1 && controlledTokens[0].id !== attacker.id) {
             target = controlledTokens[0];
             if (isDebugModeEnabled()) {
-                console.warn(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogUsingSelectedToken", {tokenName: target.name})}`);
+                console.log(`${MODULE_NAME} | ${game.i18n.format("Fvtt_CoC7th_Helper.LogUsingSelectedToken", { tokenName: target.name })}`);
+            }
+        } else {
+            if (isDebugModeEnabled()) {
+                console.log(`${MODULE_NAME} | Debug - No valid target found`);
             }
         }
+    }
+
+    if (target && isDebugModeEnabled()) {
+        console.log(`${MODULE_NAME} | Debug - Found target:`, {
+            name: target.name,
+            id: target.id,
+            actorId: target.actor.id
+        });
     }
 
     // Select effect and scale based on roll result
@@ -256,6 +221,14 @@ Hooks.on("updateChatMessage", async (message) => {
     const effectFile = effectFiles[attackType][effectKey];
     const scale = scaleFactors[effectKey];
 
+    if (isDebugModeEnabled()) {
+        console.log(`${MODULE_NAME} | Debug - Effect details:`, {
+            effectFile,
+            scale,
+            attackType
+        });
+    }
+
     // Check if Sequencer module is available
     if (!game.modules.get("sequencer")) {
         console.warn(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogSequencerNotEnabled")}`);
@@ -271,35 +244,48 @@ Hooks.on("updateChatMessage", async (message) => {
 
         if (target) {
             // Has target: shoot from attacker to target
+            if (isDebugModeEnabled()) {
+                console.log(`${MODULE_NAME} | Debug - Creating effect from attacker to target`);
+            }
             sequence
                 .atLocation(attacker)
                 .stretchTo(target)
-                .missed(!isSuccess); // Show offset effect when missed
+                .missed(!isSuccess);
         } else {
             // No target: show at attacker location
+            if (isDebugModeEnabled()) {
+                console.log(`${MODULE_NAME} | ${game.i18n.format("Fvtt_CoC7th_Helper.LogNoTargetToken", { tokenName: attacker.name })}`);
+            }
             sequence
                 .atLocation(attacker)
                 .center()
+                .randomSpriteRotation()
                 .missed(!isSuccess);
-            if (isDebugModeEnabled()) {
-                console.warn(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogNoTargetToken", {tokenName: attacker.name})}`);
-            }
         }
 
+        if (isDebugModeEnabled()) {
+            console.log(`${MODULE_NAME} | Debug - Playing sequence`);
+        }
         sequence.play();
     } catch (error) {
-        console.error(`${MODULE_NAME} | ${game.i18n.localize("Fvtt_CoC7th_Helper.LogSequencerError", {error: error.message})}`);
+        console.error(`${MODULE_NAME} | ${game.i18n.format("Fvtt_CoC7th_Helper.LogSequencerError", { error: error.message })}`);
     }
 
-    // Log results (for debugging)
+    // Final debug log
     if (isDebugModeEnabled()) {
-        const attackTypeLocalized = game.i18n.localize(`Fvtt_CoC7th_Helper.AttackType${attackType.charAt(0).toUpperCase() + attackType.slice(1)}`);
-        const resultText = isFumble 
-            ? game.i18n.localize("Fvtt_CoC7th_Helper.EffectFumble") 
-            : isSuccess 
-                ? `${game.i18n.localize("Fvtt_CoC7th_Helper.EffectRegular")} (${game.i18n.localize("Fvtt_CoC7th_Helper.EffectLevel")} ${successLevel})` 
+        const resultText = isFumble
+            ? game.i18n.localize("Fvtt_CoC7th_Helper.EffectFumble")
+            : isSuccess
+                ? `${game.i18n.localize("Fvtt_CoC7th_Helper.EffectRegular")} (${game.i18n.localize("Fvtt_CoC7th_Helper.EffectLevel")} ${successLevel})`
                 : game.i18n.localize("Fvtt_CoC7th_Helper.EffectFailure");
-        
-        console.log(`${MODULE_NAME} | CoC7 ${attackType} 武器擲骰：${attacker.name} 對抗 ${target ? target.name : game.i18n.localize("Fvtt_CoC7th_Helper.NoTarget")}，武器ID：${itemId}，結果：${resultText}，效果：${effectFile}`);
+
+        console.log(`${MODULE_NAME} | ${game.i18n.format("Fvtt_CoC7th_Helper.LogWeaponRoll", {
+            attackType: game.i18n.localize(`Fvtt_CoC7th_Helper.AttackType${attackType.charAt(0).toUpperCase() + attackType.slice(1)}`),
+            attackerName: attacker.name,
+            targetName: target ? target.name : game.i18n.localize("Fvtt_CoC7th_Helper.NoTarget"),
+            weaponId: itemId,
+            result: resultText,
+            effectFile: effectFile
+        })}`);
     }
 });

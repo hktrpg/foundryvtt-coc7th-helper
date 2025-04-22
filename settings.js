@@ -223,16 +223,6 @@ export function registerSettings() {
         type: Boolean,
         default: false
     });
-
-    // Token debug mode - more detailed token finding logs
-    game.settings.register(MODULE_NAME, "tokenDebugMode", {
-        name: game.i18n.localize("Fvtt_CoC7th_Helper.SettingTokenDebugMode"),
-        hint: game.i18n.localize("Fvtt_CoC7th_Helper.SettingTokenDebugModeHint"),
-        scope: "world",
-        config: true,
-        type: Boolean,
-        default: false
-    });
 }
 
 // Get the current effect files based on settings
@@ -284,9 +274,4 @@ export function areRangeEffectsEnabled() {
 // Check if debug mode is enabled
 export function isDebugModeEnabled() {
     return game.settings.get(MODULE_NAME, "debugMode");
-}
-
-// Check if token debug mode is enabled
-export function isTokenDebugModeEnabled() {
-    return game.settings.get(MODULE_NAME, "tokenDebugMode");
 }

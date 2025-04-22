@@ -35,9 +35,9 @@
   "Fvtt_CoC7th_Helper.LogMeleeEffectsDisabled": "近戰效果已停用",
   "Fvtt_CoC7th_Helper.LogRangeEffectsDisabled": "遠程效果已停用",
   "Fvtt_CoC7th_Helper.LogRollResultNotFound": "找不到擲骰結果，跳過 Sequencer 效果",
-  "Fvtt_CoC7th_Helper.LogAttackerNotFound": "找不到攻擊者令牌（嘗試 actorKey: {actorKey}, actorId: {actorId}），跳過 Sequencer 效果",
-  "Fvtt_CoC7th_Helper.LogUsingSelectedToken": "未提供目標鍵值，使用當前選定的令牌：{tokenName}",
-  "Fvtt_CoC7th_Helper.LogNoTargetToken": "無目標令牌，在攻擊者位置顯示效果：{tokenName}",
+  "Fvtt_CoC7th_Helper.LogAttackerNotFound": "找不到攻擊者Token（嘗試 actorKey: {actorKey}, actorId: {actorId}），跳過 Sequencer 效果",
+  "Fvtt_CoC7th_Helper.LogUsingSelectedToken": "未提供目標鍵值，使用當前選定的Token：{tokenName}",
+  "Fvtt_CoC7th_Helper.LogNoTargetToken": "無目標Token，在攻擊者位置顯示效果：{tokenName}",
   "Fvtt_CoC7th_Helper.LogSequencerNotEnabled": "Sequencer 模組未啟用，無法播放效果",
   "Fvtt_CoC7th_Helper.LogSequencerError": "播放 Sequencer 效果時發生錯誤：{error}",
   "Fvtt_CoC7th_Helper.LogWeaponRoll": "CoC7 {attackType} 武器擲骰：{attackerName} 對抗 {targetName}，武器ID：{weaponId}，結果：{result}，效果：{effectFile}"

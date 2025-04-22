@@ -18,8 +18,6 @@
   "Fvtt_CoC7th_Helper.SettingEffectFilesHint": "Customize effect files for attacks (requires refresh)",
   "Fvtt_CoC7th_Helper.SettingScaleFactors": "Effect Scale Factors",
   "Fvtt_CoC7th_Helper.SettingScaleFactorsHint": "Customize scale factors for different success levels (requires refresh)",
-  "Fvtt_CoC7th_Helper.SettingDebugMode": "Debug Mode",
-  "Fvtt_CoC7th_Helper.SettingDebugModeHint": "Enable detailed console logging for troubleshooting",
   "Fvtt_CoC7th_Helper.EffectFumble": "Fumble",
   "Fvtt_CoC7th_Helper.EffectFailure": "Failure",
   "Fvtt_CoC7th_Helper.EffectRegular": "Regular Success",
