@@ -28,7 +28,7 @@ A Foundry VTT module that enhances Call of Cthulhu 7th Edition combat by adding 
 2. Click "Install Module"
 3. Enter the following URL:
    ```
-   https://github.com/yourusername/foundryvtt-coc7th-helper/releases/latest/download/module.json
+   https://github.com/hktrpg/foundryvtt-coc7th-helper/releases/latest/download/module.json
    ```
 4. Click "Install"
 
@@ -76,6 +76,6 @@ MIT License
 
 ## Credits
 
-- Created by [Your Name]
+- Created by Sad
 - Uses animations from JB2A
 - Built for Foundry VTT and the Call of Cthulhu 7th Edition system
