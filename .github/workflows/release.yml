@@ -1,0 +1,51 @@
+name: Release Module
+
+on:
+  push:
+    paths:
+      - 'module.json'
+      - 'settings.js'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Get module version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./module.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update settings.js version
+        run: |
+          sed -i "s/export const MODULE_VERSION = \".*\"/export const MODULE_VERSION = \"${{ steps.version.outputs.version }}\"/" settings.js
+
+      - name: Create module.zip
+        run: |
+          zip -r module.zip . -x "*.git*" "*.github*"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            module.zip
+            module.json
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          body: |
+            Release v${{ steps.version.outputs.version }}
+            
+            Changes:
+            - Version updated to ${{ steps.version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
