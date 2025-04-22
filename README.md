@@ -37,12 +37,16 @@ A Foundry VTT module that enhances Call of Cthulhu 7th Edition combat by adding 
 The module includes several configurable settings:
 
 ### Effect Files
+
 You can customize the visual effects for different attack types and success levels:
+
 - Melee attacks (fumble, failure, regular, hard, extreme)
 - Ranged attacks (fumble, failure, regular, hard, extreme)
 
 ### Scale Factors
+
 Adjust the size of effects for different success levels:
+
 - Fumble: 1.0
 - Failure: 0.7
 - Regular: 0.7
@@ -50,6 +54,7 @@ Adjust the size of effects for different success levels:
 - Extreme: 1.2
 
 ### General Settings
+
 - Enable/Disable all effects
 - Enable/Disable melee effects
 - Enable/Disable ranged effects
@@ -58,6 +63,7 @@ Adjust the size of effects for different success levels:
 ## Usage
 
 The module automatically adds visual effects when:
+
 1. A weapon attack is made (melee or ranged)
 2. The attack roll is processed
 3. A target is selected (optional)
@@ -66,7 +72,7 @@ Effects will play based on the success level of the attack roll.
 
 ## License
 
-[Your chosen license]
+MIT License
 
 ## Credits
 
